@@ -1,8 +1,7 @@
-## Use Case Diagram
+# Use Case Diagram
 
-```plantuml
-@startuml
-actor Student
-usecase "پرداخت شهریه"
-Student --> (پرداخت شهریه)
-@enduml
+![Use Case](diagrams/usecase.png)
+
+# Class Diagram
+
+![Class Diagram](diagrams/classdiagram.png)
