@@ -1,7 +1,20 @@
-# Use Case Diagram
+# Software Design
 
-![Use Case](diagrams/usecase.png)
+## Project
 
-# Class Diagram
+Language Institute Tuition Management System
 
-![Class Diagram](diagrams/classdiagram.png)
+## Structure
+
+docs/
+prototype/
+
+## Documents
+
+requirements/
+analysis/
+design/
+
+## Goal
+
+University software design course project
