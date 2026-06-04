@@ -1,0 +1,75 @@
+@startuml
+left to right direction
+
+actor Admin as "مدیر سیستم"
+actor Accountant as "مسئول مالی"
+actor Student as "دانش آموز"
+actor Gateway as "درگاه پرداخت"
+
+rectangle "سیستم مدیریت شهریه" {
+
+usecase UC1 as "تعریف مدرسه"
+usecase UC2 as "تعریف پایه"
+usecase UC3 as "تعریف کلاس"
+usecase UC4 as "تعریف کلاس فوق برنامه"
+
+usecase UC5 as "ثبت دانش آموز"
+usecase UC6 as "جستجوی دانش آموز"
+
+usecase UC7 as "تعریف شهریه"
+usecase UC8 as "تعریف اقلام شهریه"
+
+usecase UC9 as "تعریف تخفیف"
+usecase UC10 as "اعمال تخفیف"
+
+usecase UC11 as "تعریف اقساط"
+usecase UC12 as "تعیین مهلت پرداخت"
+
+usecase UC13 as "مشاهده پرونده مالی"
+
+usecase UC14 as "ثبت پرداخت"
+usecase UC15 as "پرداخت آنلاین"
+
+usecase UC16 as "اعلام دیرکرد"
+usecase UC17 as "محاسبه بدهی"
+
+usecase UC18 as "صدور رسید"
+usecase UC19 as "تایید تراکنش"
+
+usecase UC20 as "گزارش بدهکاران"
+usecase UC21 as "گزارش پرداخت ها"
+
+}
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
+Admin --> UC11
+Admin --> UC20
+Admin --> UC21
+
+Accountant --> UC13
+Accountant --> UC14
+Accountant --> UC16
+Accountant --> UC17
+
+Student --> UC13
+Student --> UC15
+
+Gateway --> UC19
+
+UC10 ..> UC9 : <<include>>
+UC12 ..> UC11 : <<include>>
+
+UC15 ..> UC19 : <<include>>
+UC15 ..> UC18 : <<include>>
+
+UC16 ..> UC17 : <<include>>
+
+@enduml
