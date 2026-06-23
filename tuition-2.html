@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سیستم مدیریت شهریه - آموزشگاه پارسا</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Tahoma, Arial, sans-serif; background: #f8fafc; direction: rtl; }
+  .hidden { display: none !important; }
+
+  /* LOGIN */
+  #login-page { min-height:100vh; background:linear-gradient(135deg,#1e1b4b,#4c1d95); display:flex; align-items:center; justify-content:center; }
+  .login-box { background:#fff; border-radius:20px; padding:32px; width:360px; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+  .login-logo { text-align:center; margin-bottom:24px; }
+  .login-logo h1 { color:#fff; font-size:20px; margin-top:8px; }
+  .login-logo p { color:#a5b4fc; font-size:13px; margin-top:4px; }
+  .role-tabs { display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; background:#f8fafc; border-radius:12px; padding:4px; margin-bottom:20px; }
+  .role-tab { padding:8px 4px; border:none; border-radius:10px; cursor:pointer; font-size:11px; font-weight:bold; font-family:Tahoma,Arial,sans-serif; background:transparent; color:#94a3b8; }
+  .role-tab.active { background:#fff; color:#4f46e5; box-shadow:0 1px 4px rgba(0,0,0,0.1); }
+  .form-label { font-size:12px; color:#64748b; display:block; margin-bottom:6px; margin-top:14px; }
+  .form-input { width:100%; border:1px solid #e2e8f0; border-radius:12px; padding:10px 14px; font-size:13px; font-family:Tahoma,Arial,sans-serif; outline:none; }
+  .form-input:focus { border-color:#4f46e5; box-shadow:0 0 0 3px rgba(79,70,229,0.1); }
+  .btn-primary { width:100%; background:#4f46e5; color:#fff; border:none; border-radius:12px; padding:12px; font-weight:bold; cursor:pointer; font-size:14px; font-family:Tahoma,Arial,sans-serif; margin-top:20px; }
+  .btn-primary:hover { background:#4338ca; }
+
+  /* APP LAYOUT */
+  #app-page { display:flex; min-height:100vh; }
+  .sidebar { width:220px; background:#1e1b4b; display:flex; flex-direction:column; min-height:100vh; position:sticky; top:0; flex-shrink:0; }
+  .sidebar-logo { padding:20px 16px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:10px; }
+  .sidebar-logo span { font-size:28px; }
+  .sidebar-logo h2 { color:#fff; font-size:13px; font-weight:bold; }
+  .sidebar-logo p { color:#a5b4fc; font-size:11px; margin-top:2px; }
+  .sidebar-nav { flex:1; padding:12px 10px; }
+  .nav-btn { display:flex; align-items:center; gap:8px; width:100%; padding:10px 12px; border-radius:12px; border:none; cursor:pointer; font-size:13px; margin-bottom:4px; background:transparent; color:#a5b4fc; text-align:right; font-family:Tahoma,Arial,sans-serif; }
+  .nav-btn:hover { background:rgba(255,255,255,0.1); color:#fff; }
+  .nav-btn.active { background:#4f46e5; color:#fff; }
+  .logout-btn { margin:8px 10px 16px; padding:10px 12px; border-radius:12px; border:none; cursor:pointer; font-size:13px; background:transparent; color:#a5b4fc; text-align:right; font-family:Tahoma,Arial,sans-serif; width:calc(100% - 20px); }
+  .logout-btn:hover { background:rgba(255,255,255,0.1); color:#fff; }
+  .main { flex:1; padding:28px; overflow-y:auto; }
+  .page { display:none; }
+  .page.active { display:block; }
+  .page-title { font-size:20px; font-weight:bold; color:#1e293b; margin-bottom:24px; }
+
+  /* CARDS & TABLES */
+  .card { background:#fff; border-radius:16px; border:1px solid #e2e8f0; box-shadow:0 1px 4px rgba(0,0,0,0.05); padding:20px; margin-bottom:16px; }
+  .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+  .stat-card { border-radius:16px; padding:20px; border:1px solid; }
+  .row { display:flex; align-items:center; gap:10px; }
+  .between { display:flex; align-items:center; justify-content:space-between; }
+  .avatar { width:36px; height:36px; border-radius:50%; background:#e0e7ff; display:flex; align-items:center; justify-content:center; color:#4f46e5; font-weight:bold; font-size:14px; flex-shrink:0; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:right; padding:10px 16px; background:#f8fafc; color:#94a3b8; font-size:12px; font-weight:600; }
+  td { padding:12px 16px; border-top:1px solid #f1f5f9; color:#475569; }
+  tr:hover td { background:#f8fafc; }
+  .badge { padding:2px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+  .badge-paid { background:#d1fae5; color:#065f46; }
+  .badge-pending { background:#fef3c7; color:#92400e; }
+  .badge-overdue { background:#fee2e2; color:#991b1b; }
+  .badge-active { background:#d1fae5; color:#065f46; }
+  .badge-inactive { background:#f1f5f9; color:#64748b; }
+  .text-red { color:#ef4444; font-weight:600; }
+  .text-green { color:#10b981; }
+  .text-indigo { color:#4f46e5; }
+  .btn-sm { background:none; border:none; cursor:pointer; color:#4f46e5; font-size:12px; font-weight:600; font-family:Tahoma,Arial,sans-serif; }
+  .btn-action { background:#4f46e5; color:#fff; border:none; border-radius:12px; padding:10px 20px; font-weight:bold; cursor:pointer; font-size:13px; font-family:Tahoma,Arial,sans-serif; }
+  .btn-green { background:#10b981; color:#fff; border:none; border-radius:12px; padding:10px 20px; font-weight:bold; cursor:pointer; font-size:13px; font-family:Tahoma,Arial,sans-serif; width:100%; }
+  .search-input { width:100%; border:1px solid #e2e8f0; border-radius:12px; padding:10px 14px; font-size:13px; font-family:Tahoma,Arial,sans-serif; outline:none; margin-bottom:16px; }
+  .select-input { border:1px solid #e2e8f0; border-radius:12px; padding:10px 14px; font-size:13px; font-family:Tahoma,Arial,sans-serif; outline:none; background:#fff; }
+  .success-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; height:400px; }
+  .method-btn { padding:10px; border-radius:10px; border:2px solid #e2e8f0; background:#fff; color:#64748b; font-weight:bold; cursor:pointer; font-size:13px; font-family:Tahoma,Arial,sans-serif; }
+  .method-btn.active { border-color:#4f46e5; background:#eef2ff; color:#4f46e5; }
+  .student-select-item { display:flex; align-items:center; justify-content:space-between; padding:12px; border-radius:12px; border:2px solid #e2e8f0; background:#fff; margin-bottom:8px; cursor:pointer; }
+  .student-select-item.active { border-color:#4f46e5; background:#eef2ff; }
+  .tuition-preview { background:#eef2ff; border-radius:16px; border:1px solid #c7d2fe; padding:20px; }
+  .inst-num { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="login-page">
+  <div>
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="font-size:52px;">🎓</div>
+      <h1 style="color:#fff;font-size:22px;margin-top:10px;">آموزشگاه زبان پارسا</h1>
+      <p style="color:#a5b4fc;font-size:13px;margin-top:6px;">سیستم مدیریت شهریه</p>
+    </div>
+    <div class="login-box">
+      <h2 style="text-align:center;font-size:16px;color:#1e293b;margin-bottom:20px;">ورود به سیستم</h2>
+      <p style="font-size:12px;color:#64748b;margin-bottom:8px;">نقش کاربری</p>
+      <div class="role-tabs">
+        <button class="role-tab active" onclick="selectRole('manager',this)">مدیر آموزش</button>
+        <button class="role-tab" onclick="selectRole('accountant',this)">مسئول مالی</button>
+        <button class="role-tab" onclick="selectRole('student',this)">دانشجو / ولی</button>
+      </div>
+      <label class="form-label">نام کاربری</label>
+      <input class="form-input" id="login-user" placeholder="نام کاربری را وارد کنید">
+      <label class="form-label">رمز عبور</label>
+      <input class="form-input" type="password" id="login-pass" placeholder="رمز عبور را وارد کنید">
+      <button class="btn-primary" onclick="doLogin()">ورود به سیستم</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP PAGE -->
+<div id="app-page" class="hidden">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <span>🎓</span>
+      <div>
+        <h2>آموزشگاه پارسا</h2>
+        <p id="role-label">مدیر آموزش</p>
+      </div>
+    </div>
+    <div class="sidebar-nav" id="sidebar-nav"></div>
+    <button class="logout-btn" onclick="doLogout()">🚪 خروج از سیستم</button>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Dashboard -->
+    <div class="page active" id="page-dashboard">
+      <p class="page-title">📊 داشبورد</p>
+      <div class="grid-4">
+        <div class="stat-card" style="background:#eef2ff;border-color:#c7d2fe;">
+          <p style="font-size:12px;color:#64748b;">کل دانشجویان</p>
+          <p style="font-size:28px;font-weight:bold;color:#4f46e5;margin:6px 0;">۴۲</p>
+          <p style="font-size:11px;color:#94a3b8;">این ترم</p>
+        </div>
+        <div class="stat-card" style="background:#fee2e2;border-color:#fecaca;">
+          <p style="font-size:12px;color:#64748b;">بدهکاران</p>
+          <p style="font-size:28px;font-weight:bold;color:#ef4444;margin:6px 0;">۱۲</p>
+          <p style="font-size:11px;color:#94a3b8;">نیاز به پیگیری</p>
+        </div>
+        <div class="stat-card" style="background:#fef3c7;border-color:#fde68a;">
+          <p style="font-size:12px;color:#64748b;">اقساط معوق</p>
+          <p style="font-size:28px;font-weight:bold;color:#f59e0b;margin:6px 0;">۸</p>
+          <p style="font-size:11px;color:#94a3b8;">سررسید گذشته</p>
+        </div>
+        <div class="stat-card" style="background:#d1fae5;border-color:#a7f3d0;">
+          <p style="font-size:12px;color:#64748b;">دریافتی این ماه</p>
+          <p style="font-size:28px;font-weight:bold;color:#10b981;margin:6px 0;">۳۴.۵M</p>
+          <p style="font-size:11px;color:#94a3b8;">تومان</p>
+        </div>
+      </div>
+      <div class="card">
+        <p style="font-weight:bold;color:#1e293b;margin-bottom:16px;">بدهکاران اخیر</p>
+        <div class="between" style="padding:12px 0;border-top:1px solid #f1f5f9;">
+          <div class="row"><div class="avatar">ع</div><div><div style="font-weight:600;color:#334155;font-size:13px;">علی رضایی</div><div style="font-size:11px;color:#94a3b8;">Elementary</div></div></div>
+          <span class="text-red">۱,۲۰۰,۰۰۰ تومان</span>
+        </div>
+        <div class="between" style="padding:12px 0;border-top:1px solid #f1f5f9;">
+          <div class="row"><div class="avatar">د</div><div><div style="font-weight:600;color:#334155;font-size:13px;">دانیار احمدی</div><div style="font-size:11px;color:#94a3b8;">Intermediate</div></div></div>
+          <span class="text-red">۶۵۰,۰۰۰ تومان</span>
+        </div>
+        <div class="between" style="padding:12px 0;border-top:1px solid #f1f5f9;">
+          <div class="row"><div class="avatar">ن</div><div><div style="font-weight:600;color:#334155;font-size:13px;">نیلوفر کریمی</div><div style="font-size:11px;color:#94a3b8;">Upper-Intermediate</div></div></div>
+          <span class="text-red">۲,۴۰۰,۰۰۰ تومان</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Students -->
+    <div class="page" id="page-students">
+      <div class="between" style="margin-bottom:20px;">
+        <p class="page-title" style="margin:0;">👥 دانشجویان</p>
+        <button class="btn-action" onclick="goPage('register')">+ ثبت‌نام جدید</button>
+      </div>
+      <input class="search-input" placeholder="🔍 جستجو با نام یا کد ملی..." oninput="filterStudents(this.value)">
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table>
+          <thead><tr>
+            <th>نام و نام خانوادگی</th><th>پایه</th><th>وضعیت</th><th>بدهی</th><th></th>
+          </tr></thead>
+          <tbody id="students-tbody">
+            <tr><td><div class="row"><div class="avatar">ع</div><div><div style="font-weight:600;color:#334155;">علی رضایی</div><div style="font-size:11px;color:#94a3b8;">0012345678</div></div></div></td><td>Elementary</td><td><span class="badge badge-active">فعال</span></td><td><span class="text-red">۱,۲۰۰,۰۰۰ تومان</span></td><td><button class="btn-sm" onclick="goRecord(1)">پرونده مالی ←</button></td></tr>
+            <tr><td><div class="row"><div class="avatar">س</div><div><div style="font-weight:600;color:#334155;">سارا محمدی</div><div style="font-size:11px;color:#94a3b8;">0023456789</div></div></div></td><td>Pre-Intermediate</td><td><span class="badge badge-active">فعال</span></td><td><span class="text-green">تسویه</span></td><td><button class="btn-sm" onclick="goRecord(2)">پرونده مالی ←</button></td></tr>
+            <tr><td><div class="row"><div class="avatar">د</div><div><div style="font-weight:600;color:#334155;">دانیار احمدی</div><div style="font-size:11px;color:#94a3b8;">0034567890</div></div></div></td><td>Intermediate</td><td><span class="badge badge-active">فعال</span></td><td><span class="text-red">۶۵۰,۰۰۰ تومان</span></td><td><button class="btn-sm" onclick="goRecord(3)">پرونده مالی ←</button></td></tr>
+            <tr><td><div class="row"><div class="avatar">ن</div><div><div style="font-weight:600;color:#334155;">نیلوفر کریمی</div><div style="font-size:11px;color:#94a3b8;">0045678901</div></div></div></td><td>Upper-Intermediate</td><td><span class="badge badge-inactive">غیرفعال</span></td><td><span class="text-red">۲,۴۰۰,۰۰۰ تومان</span></td><td><button class="btn-sm" onclick="goRecord(4)">پرونده مالی ←</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Register -->
+    <div class="page" id="page-register">
+      <p class="page-title">➕ ثبت‌نام دانشجوی جدید</p>
+      <div id="register-form">
+        <div class="grid-2">
+          <div class="card">
+            <p style="font-weight:bold;color:#334155;margin-bottom:16px;font-size:14px;">اطلاعات شخصی</p>
+            <label class="form-label">نام</label><input class="form-input" style="margin-bottom:12px;" placeholder="نام">
+            <label class="form-label">نام خانوادگی</label><input class="form-input" style="margin-bottom:12px;" placeholder="نام خانوادگی">
+            <label class="form-label">کد ملی</label><input class="form-input" style="margin-bottom:12px;" placeholder="کد ملی">
+            <label class="form-label">شماره تماس</label><input class="form-input" style="margin-bottom:12px;" placeholder="شماره تماس">
+            <label class="form-label">پایه</label>
+            <select class="form-input">
+              <option>Elementary</option><option>Pre-Intermediate</option><option>Intermediate</option><option>Upper-Intermediate</option><option>Advanced</option>
+            </select>
+          </div>
+          <div>
+            <div class="card">
+              <p style="font-weight:bold;color:#334155;margin-bottom:16px;font-size:14px;">کلاس‌های فوق‌برنامه</p>
+              <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:8px;cursor:pointer;font-size:13px;color:#475569;">
+                <input type="checkbox" onchange="calcTotal()" style="accent-color:#4f46e5;width:16px;height:16px;" value="500000"> مکالمه پیشرفته
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:8px;cursor:pointer;font-size:13px;color:#475569;">
+                <input type="checkbox" onchange="calcTotal()" style="accent-color:#4f46e5;width:16px;height:16px;" value="800000"> آمادگی آیلتس
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid #e2e8f0;cursor:pointer;font-size:13px;color:#475569;">
+                <input type="checkbox" onchange="calcTotal()" style="accent-color:#4f46e5;width:16px;height:16px;" value="300000"> فیلم‌بینی انگلیسی
+              </label>
+            </div>
+            <div class="tuition-preview">
+              <p style="font-weight:bold;color:#3730a3;margin-bottom:14px;font-size:13px;">برآورد شهریه</p>
+              <div class="between" style="margin-bottom:8px;font-size:13px;"><span style="color:#64748b;">شهریه پایه</span><span>۲,۴۰۰,۰۰۰ تومان</span></div>
+              <div class="between" style="margin-bottom:8px;font-size:13px;"><span style="color:#64748b;">هزینه کتاب</span><span>۳۵۰,۰۰۰ تومان</span></div>
+              <div id="extra-lines"></div>
+              <div class="between" style="margin-bottom:8px;font-size:13px;"><span style="color:#10b981;">تخفیف اولین ثبت‌نام</span><span style="color:#10b981;">- ۲۰۰,۰۰۰ تومان</span></div>
+              <div class="between" style="border-top:1px solid #c7d2fe;padding-top:12px;margin-top:4px;">
+                <span style="font-weight:bold;color:#3730a3;">جمع کل</span>
+                <span style="font-weight:bold;color:#3730a3;font-size:15px;" id="total-amount">۲,۵۵۰,۰۰۰ تومان</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:left;margin-top:16px;">
+          <button class="btn-action" onclick="submitRegister()">ثبت دانشجو</button>
+        </div>
+      </div>
+      <div id="register-success" class="success-screen hidden">
+        <div style="font-size:64px;margin-bottom:16px;">✅</div>
+        <p style="font-size:18px;font-weight:bold;color:#1e293b;">ثبت‌نام با موفقیت انجام شد</p>
+        <p style="color:#94a3b8;font-size:13px;margin-top:8px;">در حال انتقال به لیست دانشجویان...</p>
+      </div>
+    </div>
+
+    <!-- Classes -->
+    <div class="page" id="page-classes">
+      <div class="between" style="margin-bottom:24px;">
+        <p class="page-title" style="margin:0;">📚 کلاس‌های فوق‌برنامه</p>
+        <button class="btn-action">+ کلاس جدید</button>
+      </div>
+      <div class="grid-3">
+        <div class="card" style="margin:0;">
+          <div class="between" style="margin-bottom:12px;"><span style="font-size:28px;">📖</span><span style="font-size:11px;background:#f3e8ff;color:#7c3aed;padding:2px 10px;border-radius:20px;font-weight:600;">فوق‌برنامه</span></div>
+          <p style="font-weight:bold;color:#1e293b;margin-bottom:4px;">مکالمه پیشرفته</p>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:12px;">استاد حسینی</p>
+          <p style="font-size:12px;color:#64748b;margin-bottom:4px;">🕐 شنبه - دوشنبه ۱۷:۰۰</p>
+          <p style="font-size:12px;color:#64748b;">👥 ۸ دانشجو</p>
+          <div class="between" style="border-top:1px solid #f1f5f9;margin-top:14px;padding-top:12px;">
+            <span style="font-size:12px;color:#94a3b8;">هزینه کلاس</span>
+            <span style="font-weight:bold;color:#334155;font-size:13px;">۵۰۰,۰۰۰ تومان</span>
+          </div>
+        </div>
+        <div class="card" style="margin:0;">
+          <div class="between" style="margin-bottom:12px;"><span style="font-size:28px;">🎯</span><span style="font-size:11px;background:#f3e8ff;color:#7c3aed;padding:2px 10px;border-radius:20px;font-weight:600;">فوق‌برنامه</span></div>
+          <p style="font-weight:bold;color:#1e293b;margin-bottom:4px;">آمادگی آیلتس</p>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:12px;">استاد نوروزی</p>
+          <p style="font-size:12px;color:#64748b;margin-bottom:4px;">🕐 یکشنبه - سه‌شنبه ۱۶:۰۰</p>
+          <p style="font-size:12px;color:#64748b;">👥 ۶ دانشجو</p>
+          <div class="between" style="border-top:1px solid #f1f5f9;margin-top:14px;padding-top:12px;">
+            <span style="font-size:12px;color:#94a3b8;">هزینه کلاس</span>
+            <span style="font-weight:bold;color:#334155;font-size:13px;">۸۰۰,۰۰۰ تومان</span>
+          </div>
+        </div>
+        <div class="card" style="margin:0;">
+          <div class="between" style="margin-bottom:12px;"><span style="font-size:28px;">🎬</span><span style="font-size:11px;background:#f3e8ff;color:#7c3aed;padding:2px 10px;border-radius:20px;font-weight:600;">فوق‌برنامه</span></div>
+          <p style="font-weight:bold;color:#1e293b;margin-bottom:4px;">فیلم‌بینی انگلیسی</p>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:12px;">استاد امیری</p>
+          <p style="font-size:12px;color:#64748b;margin-bottom:4px;">🕐 پنجشنبه ۱۵:۰۰</p>
+          <p style="font-size:12px;color:#64748b;">👥 ۱۲ دانشجو</p>
+          <div class="between" style="border-top:1px solid #f1f5f9;margin-top:14px;padding-top:12px;">
+            <span style="font-size:12px;color:#94a3b8;">هزینه کلاس</span>
+            <span style="font-weight:bold;color:#334155;font-size:13px;">۳۰۰,۰۰۰ تومان</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tuition -->
+    <div class="page" id="page-tuition">
+      <div class="between" style="margin-bottom:24px;">
+        <p class="page-title" style="margin:0;">💰 مدیریت شهریه</p>
+        <button class="btn-action">+ قلم جدید</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table>
+          <thead><tr><th>عنوان</th><th>نوع</th><th>مبلغ</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:600;color:#334155;">شهریه پایه Elementary</td><td><span class="badge" style="background:#e0e7ff;color:#3730a3;">شهریه پایه</span></td><td>۲,۴۰۰,۰۰۰ تومان</td></tr>
+            <tr><td style="font-weight:600;color:#334155;">شهریه پایه Pre-Intermediate</td><td><span class="badge" style="background:#e0e7ff;color:#3730a3;">شهریه پایه</span></td><td>۲,۷۰۰,۰۰۰ تومان</td></tr>
+            <tr><td style="font-weight:600;color:#334155;">شهریه پایه Intermediate</td><td><span class="badge" style="background:#e0e7ff;color:#3730a3;">شهریه پایه</span></td><td>۳,۰۰۰,۰۰۰ تومان</td></tr>
+            <tr><td style="font-weight:600;color:#334155;">هزینه کتاب</td><td><span class="badge" style="background:#fef3c7;color:#92400e;">قلم هزینه</span></td><td>۳۵۰,۰۰۰ تومان</td></tr>
+            <tr><td style="font-weight:600;color:#334155;">هزینه آزمون</td><td><span class="badge" style="background:#fef3c7;color:#92400e;">قلم هزینه</span></td><td>۲۰۰,۰۰۰ تومان</td></tr>
+            <tr><td style="font-weight:600;color:#334155;">هزینه ثبت‌نام</td><td><span class="badge" style="background:#fef3c7;color:#92400e;">قلم هزینه</span></td><td>۱۵۰,۰۰۰ تومان</td></tr>
+            <tr><td style="font-weight:600;color:#334155;">تخفیف اولین ثبت‌نام</td><td><span class="badge" style="background:#d1fae5;color:#065f46;">تخفیف</span></td><td>۲۰۰,۰۰۰ تومان</td></tr>
+            <tr><td style="font-weight:600;color:#334155;">تخفیف مناسبت خاص</td><td><span class="badge" style="background:#d1fae5;color:#065f46;">تخفیف</span></td><td>۳۰۰,۰۰۰ تومان</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <div class="page" id="page-payment">
+      <p class="page-title">💳 ثبت پرداخت حضوری</p>
+      <div id="payment-form">
+        <div class="grid-2">
+          <div class="card">
+            <p style="font-weight:bold;color:#334155;margin-bottom:16px;font-size:14px;">انتخاب دانشجو</p>
+            <div class="student-select-item" id="sel-1" onclick="selectStudent(1,'علی رضایی','Elementary','۱,۲۰۰,۰۰۰')">
+              <div class="row"><div class="avatar">ع</div><div><div style="font-weight:600;color:#334155;font-size:13px;">علی رضایی</div><div style="font-size:11px;color:#94a3b8;">Elementary</div></div></div>
+              <span class="text-red" style="font-size:12px;">۱,۲۰۰,۰۰۰ تومان</span>
+            </div>
+            <div class="student-select-item" id="sel-3" onclick="selectStudent(3,'دانیار احمدی','Intermediate','۶۵۰,۰۰۰')">
+              <div class="row"><div class="avatar">د</div><div><div style="font-weight:600;color:#334155;font-size:13px;">دانیار احمدی</div><div style="font-size:11px;color:#94a3b8;">Intermediate</div></div></div>
+              <span class="text-red" style="font-size:12px;">۶۵۰,۰۰۰ تومان</span>
+            </div>
+            <div class="student-select-item" id="sel-4" onclick="selectStudent(4,'نیلوفر کریمی','Upper-Intermediate','۲,۴۰۰,۰۰۰')">
+              <div class="row"><div class="avatar">ن</div><div><div style="font-weight:600;color:#334155;font-size:13px;">نیلوفر کریمی</div><div style="font-size:11px;color:#94a3b8;">Upper-Intermediate</div></div></div>
+              <span class="text-red" style="font-size:12px;">۲,۴۰۰,۰۰۰ تومان</span>
+            </div>
+          </div>
+          <div class="card">
+            <p style="font-weight:bold;color:#334155;margin-bottom:16px;font-size:14px;">اطلاعات پرداخت</p>
+            <div id="payment-empty" style="text-align:center;padding:40px 0;color:#94a3b8;">
+              <div style="font-size:40px;margin-bottom:8px;">👈</div>
+              <p style="font-size:13px;">ابتدا یک دانشجو انتخاب کنید</p>
+            </div>
+            <div id="payment-detail" class="hidden">
+              <div id="sel-info" style="background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:16px;font-size:13px;"></div>
+              <label class="form-label">مبلغ پرداختی (تومان)</label>
+              <input class="form-input" id="pay-amount" type="number" placeholder="مبلغ را وارد کنید" style="margin-bottom:16px;">
+              <label class="form-label" style="margin-bottom:10px;">روش پرداخت</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;">
+                <button class="method-btn active" id="method-cash" onclick="setMethod('cash')">نقدی</button>
+                <button class="method-btn" id="method-pos" onclick="setMethod('pos')">کارت‌خوان</button>
+              </div>
+              <button class="btn-green" onclick="submitPayment()">ثبت پرداخت و صدور رسید</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="payment-success" class="success-screen hidden">
+        <div style="font-size:64px;margin-bottom:16px;">🧾</div>
+        <p style="font-size:18px;font-weight:bold;color:#1e293b;">پرداخت ثبت شد</p>
+        <p style="color:#94a3b8;font-size:13px;margin-top:8px;">رسید پرداخت صادر گردید</p>
+      </div>
+    </div>
+
+    <!-- Financial Record -->
+    <div class="page" id="page-record">
+      <p class="page-title">📋 پرونده مالی</p>
+      <select class="select-input" id="record-select" onchange="loadRecord(this.value)" style="margin-bottom:20px;">
+        <option value="1">علی رضایی</option>
+        <option value="2">سارا محمدی</option>
+        <option value="3">دانیار احمدی</option>
+        <option value="4">نیلوفر کریمی</option>
+      </select>
+      <div class="grid-4" id="record-stats"></div>
+      <div class="card" id="record-installments"></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app-page -->
+
+<script>
+const RECORDS = {
+  1:{total:2400000,paid:1200000,debt:1200000,discount:200000,insts:[{n:1,amt:800000,due:"۱۴۰۳/۰۴/۰۱",st:"paid"},{n:2,amt:800000,due:"۱۴۰۳/۰۵/۰۱",st:"overdue"},{n:3,amt:800000,due:"۱۴۰۳/۰۶/۰۱",st:"pending"}]},
+  2:{total:2400000,paid:2400000,debt:0,discount:200000,insts:[{n:1,amt:1200000,due:"۱۴۰۳/۰۴/۰۱",st:"paid"},{n:2,amt:1200000,due:"۱۴۰۳/۰۵/۰۱",st:"paid"}]},
+  3:{total:1400000,paid:700000,debt:650000,discount:0,insts:[{n:1,amt:700000,due:"۱۴۰۳/۰۴/۰۱",st:"paid"},{n:2,amt:700000,due:"۱۴۰۳/۰۵/۰۱",st:"overdue"}]},
+  4:{total:2700000,paid:300000,debt:2400000,discount:300000,insts:[{n:1,amt:900000,due:"۱۴۰۳/۰۴/۰۱",st:"overdue"},{n:2,amt:900000,due:"۱۴۰۳/۰۵/۰۱",st:"overdue"},{n:3,amt:600000,due:"۱۴۰۳/۰۶/۰۱",st:"pending"}]},
+};
+const stLabel={paid:"پرداخت شده",pending:"در انتظار",overdue:"معوق"};
+const stColor={paid:{bg:"#d1fae5",c:"#065f46"},pending:{bg:"#fef3c7",c:"#92400e"},overdue:{bg:"#fee2e2",c:"#991b1b"}};
+const fmt=n=>new Intl.NumberFormat("fa-IR").format(n)+" تومان";
+
+let currentRole="manager";
+const NAV={
+  manager:[{id:"dashboard",l:"📊 داشبورد"},{id:"students",l:"👥 دانشجویان"},{id:"register",l:"➕ ثبت‌نام جدید"},{id:"classes",l:"📚 کلاس‌ها"},{id:"tuition",l:"💰 شهریه"},{id:"record",l:"📋 پرونده مالی"}],
+  accountant:[{id:"dashboard",l:"📊 داشبورد"},{id:"students",l:"👥 دانشجویان"},{id:"tuition",l:"💰 شهریه"},{id:"payment",l:"💳 ثبت پرداخت"},{id:"record",l:"📋 پرونده مالی"}],
+  student:[{id:"dashboard",l:"📊 داشبورد"},{id:"record",l:"📋 پرونده مالی"}],
+};
+const roleLabels={manager:"مدیر آموزش",accountant:"مسئول مالی",student:"دانشجو / ولی"};
+
+function selectRole(r,el){
+  currentRole=r;
+  document.querySelectorAll(".role-tab").forEach(b=>b.classList.remove("active"));
+  el.classList.add("active");
+}
+
+function buildNav(){
+  const nav=document.getElementById("sidebar-nav");
+  nav.innerHTML="";
+  NAV[currentRole].forEach(n=>{
+    const b=document.createElement("button");
+    b.className="nav-btn"+(n.id==="dashboard"?" active":"");
+    b.textContent=n.l;
+    b.onclick=()=>goPage(n.id);
+    nav.appendChild(b);
+  });
+}
+
+function goPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+  const pg=document.getElementById("page-"+id);
+  if(pg) pg.classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(b=>{ if(b.textContent.includes(NAV[currentRole].find(n=>n.id===id)?.l?.slice(2)||"")) b.classList.add("active"); });
+  // match by page id in nav
+  document.querySelectorAll(".nav-btn").forEach(b=>{
+    NAV[currentRole].forEach(n=>{ if(n.id===id && b.textContent===n.l) b.classList.add("active"); });
+  });
+  if(id==="record") loadRecord(1);
+}
+
+function doLogin(){
+  document.getElementById("login-page").classList.add("hidden");
+  document.getElementById("app-page").classList.remove("hidden");
+  document.getElementById("role-label").textContent=roleLabels[currentRole];
+  buildNav();
+}
+
+function doLogout(){
+  document.getElementById("app-page").classList.add("hidden");
+  document.getElementById("login-page").classList.remove("hidden");
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById("page-dashboard").classList.add("active");
+}
+
+function filterStudents(q){
+  const rows=document.querySelectorAll("#students-tbody tr");
+  rows.forEach(r=>{ r.style.display=r.textContent.includes(q)?"":"none"; });
+}
+
+function calcTotal(){
+  const checks=document.querySelectorAll("#page-register input[type=checkbox]:checked");
+  let extra=0;
+  const lines=[];
+  const names=["مکالمه پیشرفته","آمادگی آیلتس","فیلم‌بینی انگلیسی"];
+  checks.forEach((c,i)=>{ extra+=parseInt(c.value); lines.push(`<div class="between" style="margin-bottom:8px;font-size:13px;"><span style="color:#64748b;">${c.parentElement.textContent.trim()}</span><span>${fmt(parseInt(c.value))}</span></div>`); });
+  document.getElementById("extra-lines").innerHTML=lines.join("");
+  document.getElementById("total-amount").textContent=fmt(2400000+350000-200000+extra);
+}
+
+function submitRegister(){
+  document.getElementById("register-form").classList.add("hidden");
+  document.getElementById("register-success").classList.remove("hidden");
+  setTimeout(()=>{ document.getElementById("register-form").classList.remove("hidden"); document.getElementById("register-success").classList.add("hidden"); goPage("students"); },2000);
+}
+
+let selectedPayStudent=null;
+function selectStudent(id,name,grade,debt){
+  document.querySelectorAll(".student-select-item").forEach(el=>el.classList.remove("active"));
+  document.getElementById("sel-"+id).classList.add("active");
+  selectedPayStudent={id,name,grade,debt};
+  document.getElementById("payment-empty").classList.add("hidden");
+  document.getElementById("payment-detail").classList.remove("hidden");
+  document.getElementById("sel-info").innerHTML=`<span style="color:#64748b;">دانشجو: </span><strong>${name}</strong><br><span style="color:#64748b;">بدهی: </span><strong style="color:#ef4444;">${debt} تومان</strong>`;
+}
+
+function setMethod(m){
+  document.getElementById("method-cash").classList.toggle("active",m==="cash");
+  document.getElementById("method-pos").classList.toggle("active",m==="pos");
+}
+
+function submitPayment(){
+  document.getElementById("payment-form").classList.add("hidden");
+  document.getElementById("payment-success").classList.remove("hidden");
+  setTimeout(()=>{ document.getElementById("payment-form").classList.remove("hidden"); document.getElementById("payment-success").classList.add("hidden"); selectedPayStudent=null; document.querySelectorAll(".student-select-item").forEach(el=>el.classList.remove("active")); document.getElementById("payment-empty").classList.remove("hidden"); document.getElementById("payment-detail").classList.add("hidden"); document.getElementById("pay-amount").value=""; },2500);
+}
+
+function loadRecord(id){
+  id=parseInt(id);
+  document.getElementById("record-select").value=id;
+  const r=RECORDS[id];
+  document.getElementById("record-stats").innerHTML=`
+    <div class="card" style="margin:0;"><p style="font-size:11px;color:#94a3b8;margin-bottom:6px;">شهریه کل</p><p style="font-weight:bold;color:#334155;font-size:14px;">${fmt(r.total)}</p></div>
+    <div class="card" style="margin:0;"><p style="font-size:11px;color:#94a3b8;margin-bottom:6px;">پرداخت شده</p><p style="font-weight:bold;color:#10b981;font-size:14px;">${fmt(r.paid)}</p></div>
+    <div class="card" style="margin:0;"><p style="font-size:11px;color:#94a3b8;margin-bottom:6px;">باقی‌مانده</p><p style="font-weight:bold;color:${r.debt>0?"#ef4444":"#10b981"};font-size:14px;">${fmt(r.debt)}</p></div>
+    <div class="card" style="margin:0;"><p style="font-size:11px;color:#94a3b8;margin-bottom:6px;">تخفیف</p><p style="font-weight:bold;color:#7c3aed;font-size:14px;">${fmt(r.discount)}</p></div>
+  `;
+  const rows=r.insts.map((inst,i)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;${i>0?"border-top:1px solid #f1f5f9":""} ">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="inst-num" style="background:${stColor[inst.st].bg};color:${stColor[inst.st].c};">${inst.n}</div>
+        <div><p style="margin:0;font-weight:600;color:#334155;font-size:13px;">قسط ${inst.n}</p><p style="margin:0;font-size:11px;color:#94a3b8;">سررسید: ${inst.due}</p></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span style="font-weight:600;color:#334155;font-size:13px;">${fmt(inst.amt)}</span>
+        <span class="badge" style="background:${stColor[inst.st].bg};color:${stColor[inst.st].c};">${stLabel[inst.st]}</span>
+      </div>
+    </div>
+  `).join("");
+  document.getElementById("record-installments").innerHTML=`<p style="font-weight:bold;color:#334155;margin-bottom:16px;font-size:14px;">وضعیت اقساط</p>${rows}`;
+}
+
+loadRecord(1);
+</script>
+</body>
+</html>
