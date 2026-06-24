@@ -1,0 +1,110 @@
+@startuml
+
+class School{
++schoolId:int
++name:String
++address:String
++phone:String
+}
+
+class Grade{
++gradeId:int
++title:String
+}
+
+class ExtraClass{
++extraClassId:int
++title:String
++fee:double
+}
+
+class Student{
++studentId:int
++firstName:String
++lastName:String
++nationalCode:String
++phone:String
+
++register()
++updateInfo()
+}
+
+class FinancialRecord{
++recordId:int
++totalFee:double
++totalPaid:double
++debt:double
++latePenalty:double
+
++calculateDebt()
++calculatePenalty()
+}
+
+class Tuition{
++tuitionId:int
++academicYear:String
++totalAmount:double
+
++calculateTotalFee()
+}
+
+class TuitionItem{
++itemId:int
++title:String
++amount:double
++type:String
+}
+
+class Discount{
++discountId:int
++title:String
++amount:double
++percent:double
+
++applyDiscount()
+}
+
+class Installment{
++installmentId:int
++amount:double
++dueDate:Date
++status:String
+
++checkDueDate()
+}
+
+class Payment{
++paymentId:int
++amount:double
++paymentDate:Date
++trackingCode:String
+
++processPayment()
++generateReceipt()
+}
+
+class PaymentGateway{
++gatewayName:String
++merchantId:String
+
++verifyPayment()
+}
+
+School "1" -- "*" Grade
+Grade "1" -- "*" Student
+
+Student "*" -- "*" ExtraClass
+
+Student "1" -- "1" FinancialRecord
+
+FinancialRecord "1" -- "*" Tuition
+Tuition "1" -- "*" TuitionItem
+
+FinancialRecord "1" -- "*" Installment
+FinancialRecord "1" -- "*" Payment
+
+FinancialRecord "*" -- "*" Discount
+
+Payment --> PaymentGateway
+
+@enduml
