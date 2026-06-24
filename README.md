@@ -207,7 +207,8 @@ prototype/
 
 requirements/
 analysis/
-design/
+Diagrams/
+sequence/
 
 ## Goal
 
