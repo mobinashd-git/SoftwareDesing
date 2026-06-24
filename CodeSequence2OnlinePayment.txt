@@ -1,0 +1,37 @@
+@startuml
+
+actor Student as "دانش آموز"
+
+participant "PaymentUI" as UI
+participant "PaymentController" as Controller
+participant "PaymentService" as Service
+participant "PaymentGateway" as Gateway
+database "FinancialDB" as DB
+
+Student -> UI : انتخاب پرداخت شهریه
+
+UI -> Controller : pay(amount)
+
+Controller -> Service : processPayment(amount)
+
+Service -> Gateway : sendPaymentRequest()
+
+Gateway --> Service : paymentToken
+
+Service --> UI : نمایش درگاه پرداخت
+
+Student -> Gateway : ورود اطلاعات بانکی
+
+Gateway --> Service : paymentSuccess
+
+Service -> DB : ثبت پرداخت
+
+DB --> Service : saved
+
+Service --> Controller : success
+
+Controller --> UI : صدور رسید
+
+UI --> Student : نمایش رسید
+
+@enduml

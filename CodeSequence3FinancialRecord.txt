@@ -1,0 +1,26 @@
+@startuml
+
+actor Student as "دانش آموز"
+
+participant "FinancialUI" as UI
+participant "FinancialController" as Controller
+participant "FinancialService" as Service
+database "FinancialDB" as DB
+
+Student -> UI : مشاهده پرونده مالی
+
+UI -> Controller : getFinancialRecord()
+
+Controller -> Service : findFinancialRecord()
+
+Service -> DB : fetchFinancialData()
+
+DB --> Service : اطلاعات مالی
+
+Service --> Controller : FinancialRecord
+
+Controller --> UI : نمایش پرونده
+
+UI --> Student : بدهی، پرداخت ها، اقساط
+
+@enduml

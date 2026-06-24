@@ -1,0 +1,26 @@
+@startuml
+
+actor Admin as "مدیر سیستم"
+
+participant "StudentUI" as UI
+participant "StudentController" as Controller
+participant "StudentService" as Service
+database "StudentDB" as DB
+
+Admin -> UI : ثبت اطلاعات دانش آموز
+
+UI -> Controller : submitStudent()
+
+Controller -> Service : createStudent()
+
+Service -> DB : saveStudent()
+
+DB --> Service : studentSaved
+
+Service --> Controller : success
+
+Controller --> UI : نمایش پیام موفقیت
+
+UI --> Admin : دانش آموز ثبت شد
+
+@enduml
